@@ -15,7 +15,7 @@
 #' data <- read.csv(data/EBSLengths.csv, header=T)
 #' subsetted <- filter(data SPECIES_CODE==species, Sex==sex, AGE==age)
 #'  #Format data
-#'  renames <- renames <- c('Year', 'station', 'Lat','Lon','Area_Swept_km2','length')
+#'  renames <- renames <- c('Year', 'station', 'Lat','Lon','AreaSwept_km2','length')
 #' Data_Geostat <- data_process(subsetted, renames, id.vars=c("station", "Year"), response="length", 
 #'                             null.values="Vessel",
 #'                             YEAR, STATIONID, START_LATITUDE, START_LONGITUDE, AREA_SWEPT..km.2., LENGTH..cm.)
