@@ -37,6 +37,6 @@ data_process<- function(dataset__,  renames, id.vars, response.var, null.values 
   
   clean_data[,null.values] <- 0
   
-  return(clean_data)
+  return(as.data.frame(clean_data))
 }
 
