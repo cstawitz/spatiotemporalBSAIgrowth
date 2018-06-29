@@ -3,10 +3,11 @@
 #'of species-specific dataset and filter
 #'out non-useful variables, aggregate datasets, and return data in a form acceptable to VAST.
 #'@param dataset__ = data.frame containing raw data
-#'@param renames = list of new names
-#'@param id.vars = names of columns to construct a unique ID for
+#'@param renames = character vector of new names
+#'@param id.vars = character vector with names of columns to use in constructing a unique ID
 #'@param response = name of the column that contains your response variable (i.e. length, catch)
-#'@return a tibble that can be input into VAST
+#'@param ... = the columns that correspond to renames
+#'@return clean_data = a tibble that can be input into VAST
 data_process<- function(dataset__,  renames, id.vars, response, ...){
   #Subset to only useful columns and rename them
   qs <- rlang::quos(...)
@@ -14,17 +15,14 @@ data_process<- function(dataset__,  renames, id.vars, response, ...){
   names(subsetted) <- renames
   
   #Filter selected age and get ID columns
-  munged <- subsetted %>%
-    mutate(ID=paste(!!!rlang::syms(id.vars),sep="_"))
-  
-  #Group by unique ID and calculate average length and weight
-  DF <- munged %>%
+  clean_data <- subsetted %>%
+    mutate(ID=paste(!!!rlang::syms(id.vars),sep="_")) %>%
     group_by(ID) %>%
     mutate(Catch_KG=mean(!!!rlang::sym(response)), Vessel=0) %>%
     select(-response) %>%
     distinct() %>%
     ungroup()
-  return(DF)
   
+  return(clean_data)
 }
 
