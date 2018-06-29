@@ -8,7 +8,7 @@
 #'@param response = name of the column that contains your response variable (i.e. length, catch)
 #'@param ... = the columns that correspond to renames
 #'@return clean_data = a tibble that can be input into VAST
-data_process<- function(dataset__,  renames, id.vars, response, ...){
+data_process<- function(dataset__,  renames, id.vars, response.var, null.values = NULL ,...){
   #Subset to only useful columns and rename them
   qs <- rlang::quos(...)
   subsetted <- select(dataset__,rlang::UQS(qs))
@@ -18,10 +18,12 @@ data_process<- function(dataset__,  renames, id.vars, response, ...){
   clean_data <- subsetted %>%
     mutate(ID=paste(!!!rlang::syms(id.vars),sep="_")) %>%
     group_by(ID) %>%
-    mutate(Catch_KG=mean(!!!rlang::sym(response)), Vessel=0) %>%
-    select(-response) %>%
+    mutate(Catch_KG=mean(!!!rlang::sym(response.var))) %>%
+    select(-response.var) %>%
     distinct() %>%
     ungroup()
+  
+  clean_data[,null.values] <- 0
   
   return(clean_data)
 }
