@@ -10,6 +10,16 @@
 #'@param null.values = names of columns that VAST wants that don't have values in your dataset
 #'@param ... = the columns that correspond to renames
 #'@return clean_data = a tibble that can be input into VAST
+#'@examples
+#' \dontrun{ 
+#' data <- read.csv(data/EBSLengths.csv, header=T)
+#' subsetted <- filter(data SPECIES_CODE==species, Sex==sex, AGE==age)
+#'  #Format data
+#'  renames <- renames <- c('Year', 'station', 'Lat','Lon','Area_Swept_km2','length')
+#' Data_Geostat <- data_process(subsetted, renames, id.vars=c("station", "Year"), response="length", 
+#'                             null.values="Vessel",
+#'                             YEAR, STATIONID, START_LATITUDE, START_LONGITUDE, AREA_SWEPT..km.2., LENGTH..cm.)
+#' }
 data_process<- function(dataset__,  renames, id.vars, response.var, null.values = NULL ,...){
   #Subset to only useful columns and rename them
   qs <- rlang::quos(...)
