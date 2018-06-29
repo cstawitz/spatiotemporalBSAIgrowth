@@ -1,11 +1,13 @@
 #'@author Christine Stawitz
 #'@description Function to take a 
 #'of species-specific dataset and filter
-#'out non-useful variables, aggregate datasets, and return data in a form acceptable to VAST.
+#'down to only columns of interest, average across a unique set of id.vars, generate null values for empty values, 
+#'and return data in a form acceptable to VAST.
 #'@param dataset__ = data.frame containing raw data
-#'@param renames = character vector of new names
-#'@param id.vars = character vector with names of columns to use in constructing a unique ID
+#'@param renames = character vector of new names to rename the columns specified in ...
+#'@param id.vars = character vector with names of columns to use to construct a unique ID
 #'@param response = name of the column that contains your response variable (i.e. length, catch)
+#'@param null.values = names of columns that VAST wants that don't have values in your dataset
 #'@param ... = the columns that correspond to renames
 #'@return clean_data = a tibble that can be input into VAST
 data_process<- function(dataset__,  renames, id.vars, response.var, null.values = NULL ,...){
