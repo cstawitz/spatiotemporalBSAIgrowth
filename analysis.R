@@ -1,6 +1,5 @@
 raw_data <- read.csv("./data/EBSLengths.csv")
 require(dplyr)
-
 pollock <- raw_data %>% filter(SPECIES_CODE==21740) %>% filter(Sex==2) %>% filter(AGE==7)
 renames <- c('Year', 'station',
                   'Lat','Lon','Area_Swept_km2',
