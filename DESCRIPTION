@@ -1,0 +1,15 @@
+Package: sptmgrowthR
+Title: Analyze Growth in Bering Sea Groundfish
+Version: 0.0.0.9000
+Authors@R: c(
+          person("Christine", "Stawitz", email = "cstawitz@uw.edu", role = c("aut", "cre")),
+           person("James", "Thorson", email = "james.thorson@noaa.gov", role = c("aut")))
+Description: This package processes survey data and inputs it into the VAST software to analyze changes in mean length-at-age across a number of groundfish species.
+Depends: R (>= 3.5.0)
+License: GPL-3.0
+Encoding: UTF-8
+LazyData: true
+Imports:
+  dplyr,
+  purrr
+
