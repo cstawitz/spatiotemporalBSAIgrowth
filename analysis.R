@@ -7,7 +7,8 @@ devtools::install_github("ropensci/drake")
 library(VAST)
 library(drake)
 library(compiler)
-Version = "VAST_v2_5_0"
+library(dplyr)
+Version = "VAST_v5_2_0"
 
 
 source("R/vast_config.R")
