@@ -27,6 +27,7 @@ sample.sizes <-purrr::map(list(pollock, cod, arth), get_length_weight, name=c("L
 sample.sizes.yr <- split(arth, arth$YEAR) %>% purrr::map(get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
 
 
+
 data_plan <- drake_plan(
   pollock = create_data(raw_data,species=21740,
                          sex=2, age=7),
