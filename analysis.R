@@ -2,8 +2,9 @@
 #Header
 require(dplyr)
 library(TMB)
-devtools::install_github("james-thorson/VAST")
+devtools::install_github("james-thorson/VAST", ref = "1b49b900e047cdb7f34b4e5a83ed11fb90866761")
 devtools::install_github("ropensci/drake")
+devtools::load_all("C:/Users/Christine.Stawitz/Documents/VAST")
 library(VAST)
 library(drake)
 library(compiler)
@@ -19,6 +20,11 @@ raw_data <- read.csv("./data/EBSLengths.csv")
 renames <- c('Year', 'station',
              'Lat','Lon','AreaSwept_km2',
              'length')
+pollock <- filter(raw_data, SPECIES_CODE==21740)
+cod <- filter(raw_data, SPECIES_CODE==21720)
+arth <- filter(raw_data, SPECIES_CODE==10110)
+sample.sizes <-purrr::map(list(pollock, cod, arth), get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
+sample.sizes.yr <- split(arth, arth$YEAR) %>% purrr::map(get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
 
 
 data_plan <- drake_plan(
