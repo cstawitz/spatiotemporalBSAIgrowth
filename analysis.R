@@ -23,6 +23,7 @@ renames <- c('Year', 'station',
 pollock <- filter(raw_data, SPECIES_CODE==21740)
 cod <- filter(raw_data, SPECIES_CODE==21720)
 arth <- filter(raw_data, SPECIES_CODE==10110)
+get_unbiased_lengths(pollock, "AGE", "LENGTH..cm.", "YEAR", "STATIONID")
 sample.sizes <-purrr::map(list(pollock, cod, arth), get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
 sample.sizes.yr <- split(arth, arth$YEAR) %>% purrr::map(get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
 
