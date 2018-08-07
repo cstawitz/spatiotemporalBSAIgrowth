@@ -45,7 +45,7 @@ Spatial_List = SpatialDeltaGLMM::Spatial_Information_Fn( grid_size_km=grid_size_
                                                          Extrapolation_List=Extrapolation_List, 
                                                          randomseed=Kmeans_Config[["randomseed"]], 
                                                          nstart=Kmeans_Config[["nstart"]], iter.max=Kmeans_Config[["iter.max"]], 
-                                                         DirPath=DateFile, Save_Results=FALSE )
+                                                         DirPath=DateFile, Save_Results=FALSE)
 # Add knots to Data_Geostat
 Data_Geostat = cbind( Data_Geostat, "knot_i"=Spatial_List$knot_i )
 TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig, "OverdispersionConfig"=OverdispersionConfig, 
