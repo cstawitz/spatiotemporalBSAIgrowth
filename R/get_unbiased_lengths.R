@@ -6,47 +6,61 @@
 #'@return a matrix of mean ages per year
 get_unbiased_lengths <- function(dataset__, age.name, length.name, year.name, station.name){
   #initialize dimension scalars
-  
   l <- round(select(dataset__,length.name),0)
   length_groups <- min(l):max(l)
   ages <- min(select(dataset__,age.name), na.rm=T):max(select(dataset__,age.name), na.rm=T)
-  browser()
+
+  #aggregate data by station & year
   bystation_yr<- dataset__ %>% filter(!!sym(station.name)!="") %>%
     mutate("ID"=paste(!!sym(year.name), !!sym(station.name), sep="_")) %>%
-    group_by(ID, !!sym(age.name), "r.length" = round(!!sym(length.name),0)) %>%
+    group_by(ID, !!sym(age.name), "r.length" = round(!!sym(length.name),0), add=T) %>%
     summarise("sample.size"=n(), "mean.l"=mean(!!sym(length.name)))
 
-
+#Function to get unbiased lengths for each station and year
   get_each_station_yr <- function(station_yr_df){
-    age_lengths <- array(dim=c(length(length_groups), length(ages)+1))
-    browser()
+    size_at_age <- rep(0,length(ages))
 
-  #Do math
-  LengthSums <- station_yr_df %>% group_by(r.length) %>% summarise("l.sum"=sum(sample.size))
-  Subsampled <- station_yr_df %>% filter(!is.na(!!sym(age.name))) %>% group_by(r.length) %>%
-    summarise("l.sum"=sum(sample.size))
+    #Do math
+    #sample size of all length measurements in each 1cm length bin
+    LengthSums <- station_yr_df %>% group_by(r.length) %>% summarise("l.sum"=sum(sample.size))
+    #sample size of length measurements in each 1cm length bin for lengths of fish subsampled for ageing
+    Subsampled <- station_yr_df %>% filter(!is.na(!!sym(age.name))) %>% group_by(r.length) %>%
+      summarise("l.sum"=sum(sample.size))
   
   
-  for(i in 1:ages){
-    tmp.dat <- filter(station_yr_df, !!sym(age.name)==i)
-    lens <- tmp.dat$r.length
-    Nj <- LengthSums %>% filter(r.length %in% lens) %>% select(l.sum)
-    nj <- Subsampled %>% filter(r.length %in% lens) %>% select(l.sum)
+    for(i in 1:length(ages)){
+      #Each age data frame
+      tmp.dat <- filter(station_yr_df, !!sym(age.name)==ages[i])
 
-    Nij <- Nj*(tmp.dat$sample.size/nj)
-    
-
-    Ni <- sum(tmp.dat$sample.size)
-    #avgLength <- group_by(tmp.dat, r.length) %>%
-    #mutate("avg"=mean(r.length))
-    
-    unbiased_l[i,] <- sum(Nij*avgLength[i,])/Ni[i]    
+      if(nrow(tmp.dat)>0){
+        #number of length classes with observations for each age
+        lens <- tmp.dat$r.length
+        #Sample size of all fish
+        Nj <- LengthSums %>% filter(r.length %in% lens) %>% select(l.sum)
+        #Sample size of all aged fish
+        nj <- Subsampled %>% filter(r.length %in% lens) %>% select(l.sum)
+        
+        #Sample size of number of age i fish subsampled in the jth length group
+        Nij <- Nj*(tmp.dat$sample.size/nj)
+        #Sample size of all age i fish
+        Ni <- sum(tmp.dat$sample.size)
+        #Corrected mean length at age i
+        size_at_age[i] <- sum(Nij*tmp.dat$mean.l)/Ni
+      } else{
+        size_at_age[i] <- NA
+      }
+    }
+    return(size_at_age)
   }
-  }
   
-  
+  #Apply unbiased length calculation to each station:year stratum
   x <- split(bystation_yr, bystation_yr$ID) %>%
-    purrr::map(~get_each_station_yr(.x))
+    purrr::map(~get_each_station_yr(.x)) %>%
+    purrr::map_dfr(~as.data.frame(rbind(.)))
   
-  
+  #Add names
+  row.names(x) <- unique(bystation_yr$ID)
+  colnames(x) <- ages
+
+  return(x)
 }

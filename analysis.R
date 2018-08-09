@@ -20,10 +20,12 @@ raw_data <- read.csv("./data/EBSLengths.csv")
 renames <- c('Year', 'station',
              'Lat','Lon','AreaSwept_km2',
              'length')
-pollock <- filter(raw_data, SPECIES_CODE==21740)
+pollock <- filter(raw_data, SPECIES_CODE==21740, Sex==2)
+pol.lengths <- get_unbiased_lengths(pollock, "AGE", "LENGTH..cm.", "YEAR", "STATIONID")
+
 cod <- filter(raw_data, SPECIES_CODE==21720)
 arth <- filter(raw_data, SPECIES_CODE==10110)
-get_unbiased_lengths(pollock, "AGE", "LENGTH..cm.", "YEAR", "STATIONID")
+
 sample.sizes <-purrr::map(list(pollock, cod, arth), get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
 sample.sizes.yr <- split(arth, arth$YEAR) %>% purrr::map(get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
 
@@ -40,7 +42,7 @@ Data_Geostat<- create_data(raw_data,species=21740,
                            sex=2, age=7, renames)
 Extrapolation_List = SpatialDeltaGLMM::Prepare_Extrapolation_Data_Fn( Region=Region, strata.limits=strata.limits )
 
-Spatial_List = SpatialDeltaGLMM::Spatial_Information_Fn( grid_size_km=grid_size_km, n_x=n_x, Method=Method, 
+Spatial_List = SpatialDeltaGLMM::Spatial_Information_Fn(grid_size_km=grid_size_km, n_x=n_x, Method=Method, 
                                                          Lon=Data_Geostat[,'Lon'], Lat=Data_Geostat[,'Lat'], 
                                                          Extrapolation_List=Extrapolation_List, 
                                                          randomseed=Kmeans_Config[["randomseed"]], 
