@@ -22,9 +22,16 @@ renames <- c('Year', 'station',
              'length')
 pollock <- filter(raw_data, SPECIES_CODE==21740, Sex==2)
 pol.lengths <- get_unbiased_lengths(pollock, "AGE", "LENGTH..cm.", "YEAR", "STATIONID")
+yrs <- unique(substr(rownames(pol.lengths),1,4))
+row.index <- lapply(1:length(yrs), function(x) which(substr(rownames(pol.lengths),1,4)==yrs[x]))
 
-cod <- filter(raw_data, SPECIES_CODE==21720)
-arth <- filter(raw_data, SPECIES_CODE==10110)
+plot(NA, xlim=as.numeric(c(min(yrs),max(yrs))), ylim=c(min(pol.lengths[,7:10], na.rm=T), max(pol.lengths[,7:10], na.rm=T)), 
+     las=1, xlab="Years", ylab="Size (cm)")
+lapply(7:10, function(y)
+  lapply(1:length(yrs), function(x) points(pol.lengths[row.index[[x]],y]~rep(yrs[x],length(row.index[[x]])), col=y)))
+
+cod <- filter(raw_data, SPECIES_CODE==21720, Sex==2)
+arth <- filter(raw_data, SPECIES_CODE==10110, Sex==2)
 
 sample.sizes <-purrr::map(list(pollock, cod, arth), get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
 sample.sizes.yr <- split(arth, arth$YEAR) %>% purrr::map(get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
