@@ -2,9 +2,9 @@
 #Header
 require(dplyr)
 library(TMB)
-devtools::install_github("james-thorson/VAST", ref = "1b49b900e047cdb7f34b4e5a83ed11fb90866761")
+devtools::install_github("cstawitz/VAST")
 devtools::install_github("ropensci/drake")
-devtools::load_all("C:/Users/Christine.Stawitz/Documents/VAST")
+devtools::load_all("C:/Users/chris/Documents/VAST")
 library(VAST)
 library(drake)
 library(compiler)
@@ -38,12 +38,12 @@ sample.sizes.yr <- split(arth, arth$YEAR) %>% purrr::map(get_length_weight, name
 
 
 
-data_plan <- drake_plan(
+
   pollock = create_data(raw_data,species=21740,
-                         sex=2, age=7),
-  pcod = create_data(raw_data, species=21720, sex=2, age=4),
-  arrowtooth = create_data(raw_data, species=10110, sex=2, age=4)
-)
+                         sex=2, age=6)
+  pcod = create_data(raw_data, species=21720, sex=2, age=4)
+  arrowtooth = create_data(raw_data, species=10110, sex=2, age=7)
+
 
 Data_Geostat<- create_data(raw_data,species=21740,
                            sex=2, age=7, renames)
