@@ -7,14 +7,14 @@ install_github("kaskr/adcomp/TMB")
 # source script to get INLA from the web
 source("http://www.math.ntnu.no/inla/givemeINLA.R")  
 library(TMB)
-with_libpaths(new = "C:/Users/Christine.Stawitz/R_LIBS", install_github("cstawitz/VAST"))
-devtools::install_github("ropensci/drake")
+withr::with_libpaths(new = "C:/Users/Christine.Stawitz/R_LIBS", install_github("cstawitz/VAST"))
+devtools::install_github("James-Thorson/VAST", ref="development")
 devtools::load_all("C:/Users/chris/Documents/VAST")
 library(VAST)
 library(drake)
 library(compiler)
 library(dplyr)
-Version = "VAST_v5_2_0"
+Version = "VAST_v5_3_0"
 
 
 source("R/vast_config.R")
@@ -68,5 +68,5 @@ TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
                   "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options )
 
 
-TmbList = SpatialDeltaGLMM::Build_TMB_Fn("TmbData"=TmbData, "RunDir"=DateFile, "Version"=Version, "RhoConfig"=RhoConfig, 
+TmbList = Build_TMB_Fn("TmbData"=TmbData, "RunDir"=DateFile, "Version"=Version, "RhoConfig"=RhoConfig, 
                        "loc_x"=Spatial_List$loc_x, "Method"=Method)
