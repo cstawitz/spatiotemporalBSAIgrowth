@@ -9,6 +9,7 @@ Kmeans_Config = list( "randomseed"=1, "nstart"=100, "iter.max"=1e3 )
 FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=1, "Epsilon2"=1) 
 RhoConfig = c("Beta1"=0, "Beta2"=0, "Epsilon1"=0, "Epsilon2"=0) 
 OverdispersionConfig = c("Delta1"=0, "Delta2"=0)
+#Lognormal instead of normal?
 ObsModel = c(0,3)   
 
 #Postprocessing
