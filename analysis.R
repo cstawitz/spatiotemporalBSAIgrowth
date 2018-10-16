@@ -29,38 +29,23 @@ renames <- c('Year', 'station',
 pollock <- filter(raw_data, SPECIES_CODE==21740, Sex==2)
 cod <- filter(raw_data, SPECIES_CODE==21720, Sex==2)
 arrow <- filter(raw_data, SPECIES_CODE==10110, Sex==2)
+
+pollock.lengths <- get_unbiased_lengths(pollock, "AGE", "LENGTH..cm.", "YEAR", "STATIONID")
+corrected_age6<- data.frame(cbind(row.names(pollock.lengths),select(pollock.lengths, "6")))
+names(corrected_age6) <- c("ID", "lengths")
 cod.lengths <- get_unbiased_lengths(cod, "AGE", "LENGTH..cm.", "YEAR", "STATIONID")
 corrected_age4<- data.frame(cbind(row.names(cod.lengths),select(cod.lengths, "4")))
 arrow <- filter(raw_data, SPECIES_CODE==10110, Sex==2)
 arw.lengths <- get_unbiased_lengths(arrow, "AGE", "LENGTH..cm.", "YEAR", "STATIONID")
 corrected_age7<- data.frame(cbind(row.names(arw.lengths),select(arw.lengths, "7")))
 names(corrected_age7) <- c("ID", "lengths")
-yrs <- unique(substr(rownames(pol.lengths),1,4))
-row.index <- lapply(1:length(yrs), function(x) which(substr(rownames(pol.lengths),1,4)==yrs[x]))
 
-plot(NA, xlim=as.numeric(c(min(yrs),max(yrs))), ylim=c(min(pol.lengths[,7:10], na.rm=T), max(pol.lengths[,7:10], na.rm=T)), 
-     las=1, xlab="Years", ylab="Size (cm)")
-lapply(7:10, function(y)
-  lapply(1:length(yrs), function(x) points(pol.lengths[row.index[[x]],y]~rep(yrs[x],length(row.index[[x]])), col=y)))
-
-sample.sizes <-purrr::map(list(pollock, cod, arth), get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
-sample.sizes.yr <- split(arth, arth$YEAR) %>% purrr::map(get_length_weight, name=c("LENGTH..cm.","WEIGHT..g.", "AGE"))
-
-
-cv.length.age <- split(arrow, arrow$AGE) %>% purrr::map(get_length_cv, name=c("YEAR")) %>% unlist()
-cv.length.age <- purrr::map(list(pollock, cod, arrow),
-                            get_length_cv, name="AGE", length.name="LENGTH..cm.")
-pdf("LengthAge.pdf")
-for(i in 1:3){
-  plot(CV~AGE, data=cv.length.age[[i]])
-}
-dev.off()
   pollock = create_data(raw_data,species=21740,
                          sex=2, age=6, renames)
   pcod = create_data(raw_data, species=21720, sex=2, age=4, renames)
   arrowtooth = create_data(raw_data, species=10110, sex=2, age=7, renames)
 
-Data_Geostat <- left_join(arrowtooth, corrected_age7, by="ID") %>% select(Year, station, Lat, Lon, AreaSwept_km2,Vessel, Catch_KG=lengths)
+Data_Geostat <- left_join(pollock, corrected_age6, by="ID") %>% select(Year, station, Lat, Lon, AreaSwept_km2,Vessel, Catch_KG=lengths)
 
 Extrapolation_List = FishStatsUtils::make_extrapolation_info( Region=Region, strata.limits=strata.limits )
 

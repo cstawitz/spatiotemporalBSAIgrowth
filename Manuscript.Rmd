@@ -1,0 +1,36 @@
+---
+title: "Manuscript"
+author:-name: Christine C. Stawitz
+-name: James T. Thorson
+date: "October 16, 2018"
+output: word_document
+  pandoc_args: ["-Fpandoc-crossref"]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Methods
+
+We analyzed mean length-at-age for a number of Eastern Bering Sea species: walleye pollock (*Gadus chalcogrammus*), Pacific cod (*Gadus macrocephalus*), and arrowtooth flounder (*Atheresthes stomas*). Species were chosen as they have databases of fishery-independent length and age data dating back to 1982, substantial information on diet preferences, and are commercially and/or ecologically important to the region. We fit a spatio-temporal model to average length by year and region for each species using the VAST (Vector Autoregressive Spatio-Temporal) R package incorporating environmental covariates hypothesized to be important drivers of body size based on previous research. 
+
+# Data
+
+Fishery-independent length and age data were extracted from the Bering Sea survey conducted annually by the National Oceanic and Atmospheric Administration’s trawl survey. The data extracted included measured length, age, sex, and weight of each sampled fish, in addition to haul-specific data on the start latitude, longitude, and survey station, temperature and depth, and gear-specific data on the gear type and net width used to collect fish. 
+
+# Model fitting
+
+We calculated average length-at-age for each year at each survey station, where each survey station represents a unique latitude and longitude pairing from which fish were collected. In some years, ages were collected based on length-stratified sampling, which aged equal numbers of fish from each pre-specified length group. Length groups were pre-specified based on 1 cm bins (confirm in sampling protocol documents). To obtain accurate estimates of population length-at-age, we corrected for the effect of length-stratified ageing as in Bettoli and Miranda (1992). The corrected mean length for each survey station and each year of data for each species *i* was our response variable.
+
+
+
+## Results
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
