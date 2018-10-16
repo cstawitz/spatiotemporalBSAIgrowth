@@ -10,12 +10,13 @@ library(TMB)
 devtools::install_github("james-thorson/VAST", ref="development")
 devtools::install_github("james-thorson/FishStatsUtils")
 devtools::install_github("ropensci/drake")
+withr::with_libpaths(new = "C:/Users/Christine.Stawitz/R_LIBS", install_github("cstawitz/VAST"))
 devtools::load_all("C:/Users/chris/Documents/VAST")
 library(VAST)
 library(drake)
 library(compiler)
 library(dplyr)
-Version = "VAST_v5_2_0"
+Version = "VAST_v5_3_0"
 
 
 source("R/vast_config.R")
@@ -64,7 +65,6 @@ TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
                   "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList, 
                   "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options )
 
-require(TMB)
 TmbList = Build_TMB_Fn("TmbData"=TmbData, "RunDir"=DateFile, "Version"=Version, "RhoConfig"=RhoConfig, 
                        "loc_x"=Spatial_List$loc_x, "Method"=Method)
 Obj = TmbList[["Obj"]]

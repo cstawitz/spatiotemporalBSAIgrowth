@@ -12,7 +12,7 @@ get_unbiased_lengths <- function(dataset__, age.name, length.name, year.name, st
 
   #aggregate data by station & year
   bystation_yr<- dataset__ %>% filter(!!sym(station.name)!="") %>%
-    mutate("ID"=paste(!!sym(year.name), !!sym(station.name), sep="_")) %>%
+    mutate("ID"=paste(!!sym(station.name), !!sym(year.name), sep="_")) %>%
     group_by(ID, !!sym(age.name), "r.length" = round(!!sym(length.name),0), add=T) %>%
     summarise("sample.size"=n(), "mean.l"=mean(!!sym(length.name)))
 
@@ -20,7 +20,7 @@ get_unbiased_lengths <- function(dataset__, age.name, length.name, year.name, st
   get_each_station_yr <- function(station_yr_df){
     size_at_age <- rep(0,length(ages))
 
-    #Do math
+    #Do mathpol.l
     #sample size of all length measurements in each 1cm length bin
     LengthSums <- station_yr_df %>% group_by(r.length) %>% summarise("l.sum"=sum(sample.size))
     #sample size of length measurements in each 1cm length bin for lengths of fish subsampled for ageing
@@ -29,26 +29,9 @@ get_unbiased_lengths <- function(dataset__, age.name, length.name, year.name, st
   
   
     for(i in 1:length(ages)){
+      size_at_age[i] <- get_each_age(station_yr_df, ages[i], LengthSums, Subsampled)
       #Each age data frame
-      tmp.dat <- filter(station_yr_df, !!sym(age.name)==ages[i])
-
-      if(nrow(tmp.dat)>0){
-        #number of length classes with observations for each age
-        lens <- tmp.dat$r.length
-        #Sample size of all fish
-        Nj <- LengthSums %>% filter(r.length %in% lens) %>% select(l.sum)
-        #Sample size of all aged fish
-        nj <- Subsampled %>% filter(r.length %in% lens) %>% select(l.sum)
-        
-        #Sample size of number of age i fish subsampled in the jth length group
-        Nij <- Nj*(tmp.dat$sample.size/nj)
-        #Sample size of all age i fish
-        Ni <- sum(tmp.dat$sample.size)
-        #Corrected mean length at age i
-        size_at_age[i] <- sum(Nij*tmp.dat$mean.l)/Ni
-      } else{
-        size_at_age[i] <- NA
-      }
+     
     }
     return(size_at_age)
   }
