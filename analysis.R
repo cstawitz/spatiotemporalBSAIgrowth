@@ -1,19 +1,9 @@
-#Config VAST
-#Header
-require(dplyr)
-# devtools command to get TMB from GitHub
-require(devtools)
-install_github("kaskr/adcomp/TMB") 
-# source script to get INLA from the web
-source("http://www.math.ntnu.no/inla/givemeINLA.R")  
-library(TMB)
-devtools::install_github("james-thorson/VAST", ref="development")
-devtools::install_github("james-thorson/FishStatsUtils")
-devtools::install_github("ropensci/drake")
-withr::with_libpaths(new = "C:/Users/Christine.Stawitz/R_LIBS", install_github("cstawitz/VAST"))
-devtools::load_all("C:/Users/chris/Documents/VAST")
+############# ONLY TO INSTALL TMB & local VAST copy
+source("setup_pkgs.R")
+#########################
+
+
 library(VAST)
-library(drake)
 library(compiler)
 library(dplyr)
 Version = "VAST_v5_3_0"
@@ -24,31 +14,27 @@ source("R/vast_config.R")
 
 #Read in raw data
 raw_data <- read.csv("./data/EBSLengths.csv")
+
+#Data Check
+clean_data <- raw_data
+
+#Vector to rename columns to
 renames <- c('Year', 'station',
              'Lat','Lon',
              'length')
-pollock <- filter(raw_data, SPECIES_CODE==21740, Sex==2)
-cod <- filter(raw_data, SPECIES_CODE==21720, Sex==2)
-arrow <- filter(raw_data, SPECIES_CODE==10110, Sex==2)
 
-pollock.lengths <- get_unbiased_lengths(pollock, "AGE", "LENGTH..cm.", "YEAR", "STATIONID")
-corrected_age6<- data.frame(cbind(row.names(pollock.lengths),select(pollock.lengths, "6")))
-names(corrected_age6) <- c("ID", "lengths")
-cod.lengths <- get_unbiased_lengths(cod, "AGE", "LENGTH..cm.", "YEAR", "STATIONID")
-corrected_age4<- data.frame(cbind(row.names(cod.lengths),select(cod.lengths, "4")))
-arrow <- filter(raw_data, SPECIES_CODE==10110, Sex==2)
-arw.lengths <- get_unbiased_lengths(arrow, "AGE", "LENGTH..cm.", "YEAR", "STATIONID")
-corrected_age7<- data.frame(cbind(row.names(arw.lengths),select(arw.lengths, "7")))
-names(corrected_age7) <- c("ID", "lengths")
+#Build Data_Geostat for each spp
+arrowtooth = build_corrected_df(clean_data,species_code = 10110,
+                      sex=2, age="7", renames)
+pollock = build_corrected_df(clean_data,species_code =21740,
+                         sex=2, age="6", renames)
+pcod = build_corrected_df(clean_data, species_code =21720, 
+                          sex=2, age="4", renames)
 
-  pollock = create_data(raw_data,species=21740,
-                         sex=2, age=6, renames)
-  pcod = create_data(raw_data, species=21720, sex=2, age=4, renames)
-  arrowtooth = create_data(raw_data, species=10110, sex=2, age=7, renames)
-
-Data_Geostat <- left_join(pollock, corrected_age6, by="ID") %>% select(Year, station, Lat, Lon, AreaSwept_km2,Vessel, Catch_KG=lengths)
 
 Extrapolation_List = FishStatsUtils::make_extrapolation_info( Region=Region, strata.limits=strata.limits )
+
+Data_Geostat <- pcod
 
 Spatial_List = FishStatsUtils::make_spatial_info(grid_size_km=grid_size_km, n_x=n_x, Method=Method, 
                                                          Lon=Data_Geostat[,'Lon'], Lat=Data_Geostat[,'Lat'], 
@@ -73,6 +59,7 @@ Opt = TMBhelper::Optimize(obj=Obj, lower=TmbList[["Lower"]], upper=TmbList[["Upp
 Report = Obj$report()
 Save=list("Opt"=Opt, "Report"=Report, "ParHat"= Obj$env$parList(Opt$par), "TmbData"=TmbData)
 save(Save, file=paste0(DateFile, "Save.RData"))
+
 cod.obj <- load("Save.RData")
 plot_data(Extrapolation_List, Spatial_List, Data_Geostat,PlotDir=DateFile)
 
