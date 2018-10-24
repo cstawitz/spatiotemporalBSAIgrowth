@@ -55,12 +55,13 @@ TmbList = Build_TMB_Fn("TmbData"=TmbData, "RunDir"=DateFile, "Version"=Version, 
                        "loc_x"=Spatial_List$loc_x, "Method"=Method)
 Obj = TmbList[["Obj"]]
 Opt = TMBhelper::Optimize(obj=Obj, lower=TmbList[["Lower"]], upper=TmbList[["Upper"]], getsd=TRUE, savedir=DateFile, bias.correct=TRUE, newtonsteps=1, bias.correct.control=list(sd=FALSE, split=NULL, nsplit=1, vars_to_correct="Index_cyl"))
+#, control = list(abs.tol = 1e-20))
 
 Report = Obj$report()
 Save=list("Opt"=Opt, "Report"=Report, "ParHat"= Obj$env$parList(Opt$par), "TmbData"=TmbData)
 save(Save, file=paste0(DateFile, "Save.RData"))
 
-load("./VAST_Output/Save.RData")
+load("./Save.RData")
 Report <- Save$Report
 plot_data(Extrapolation_List, Spatial_List, Data_Geostat,PlotDir=DateFile)
 
@@ -103,4 +104,6 @@ pander::pandoc.table( Dens_DF[1:6,], digits=3 )
 ## Index of abundance
 Index = plot_biomass_index( DirName=DateFile, TmbData=TmbData, Sdreport=Opt[["SD"]], Year_Set=Year_Set, Years2Include=Years2Include, use_biascorr=TRUE )
 pander::pandoc.table( Index$Table[,c("Year","Fleet","Estimate_metric_tons","SD_log","SD_mt")] ) 
+
+
 
