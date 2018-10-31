@@ -7,16 +7,16 @@
 #'@param renames = character vector of new names to rename the columns specified in ...
 #'@param id.vars = character vector with names of columns to use to construct a unique ID
 #'@param response = name of the column that contains your response variable (i.e. length, catch)
-#'@param null.values = names of columns that VAST wants that don't have values in your dataset
+#'@param null.values = names of columns to create dummy values for
 #'@param ... = the columns that correspond to renames
-#'@return clean_data = a tibble that can be input into VAST
+#'@return clean_data = a tibble 
 #'@examples
 #' \dontrun{ 
 #' data <- read.csv(data/EBSLengths.csv, header=T)
 #' subsetted <- filter(data SPECIES_CODE==species, Sex==sex, AGE==age)
 #'  #Format data
 #'  renames <- renames <- c('Year', 'station', 'Lat','Lon','AreaSwept_km2','length')
-#' Data_Geostat <- data_process(subsetted, renames, id.vars=c("station", "Year"), response="length", 
+#' Data_Geostat <- data_process(subsetted, renames, id.vars=c("station", "Year"), response.var="length", 
 #'                             null.values="Vessel",
 #'                             YEAR, STATIONID, START_LATITUDE, START_LONGITUDE, AREA_SWEPT..km.2., LENGTH..cm.)
 #' }
