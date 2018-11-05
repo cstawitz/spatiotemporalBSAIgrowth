@@ -30,7 +30,7 @@ data_process<- function(dataset__,  renames, id.vars, response.var, null.values 
   clean_data <- subsetted %>%
     mutate(ID=paste(!!!rlang::syms(id.vars),sep="_")) %>%
     group_by(ID) %>%
-    mutate(Catch_KG=mean(!!!rlang::sym(response.var))) %>%
+    mutate(Catch_Kg=mean(!!!rlang::sym(response.var))) %>%
     select(-response.var) %>%
     distinct() %>%
     ungroup()

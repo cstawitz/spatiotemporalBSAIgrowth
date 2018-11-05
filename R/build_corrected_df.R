@@ -11,7 +11,9 @@ build_corrected_df <- function(dataset__, age, species_code, sex, renames){
   corrected_age<- data.frame(cbind(row.names(corrected_lengths),select(corrected_lengths, age)))
   names(corrected_age) <- c("ID", "lengths")
   
-  renames_set = create_data(dataset__, species=species_code, sex=sex, age=age, renames = renames)
+  renames_set =  data_process(species_data, renames, id.vars=c("Year", "station"), response="length", 
+                                               null.values=c("Vessel", "AreaSwept_km2"),
+                                               YEAR, STATIONID, START_LATITUDE, START_LONGITUDE, LENGTH..cm.)
   
   Data_Geo<- left_join(renames_set, corrected_age, by="ID") %>% select(Year, station, Lat, Lon, AreaSwept_km2,Vessel, Catch_KG= lengths)
   return(Data_Geo)
