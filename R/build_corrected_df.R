@@ -6,15 +6,22 @@
 #'@param sex - code for fish sex
 #'@param renames - vector of renames 
 build_corrected_df <- function(dataset__, age, species_code, sex, renames){
-  species_data <- filter(dataset__, SPECIES_CODE==species_code, Sex==sex)
-  corrected_lengths <- get_unbiased_lengths(species_data, age.name="AGE", length.name = "LENGTH..cm.", year.name = "YEAR", station.name = "STATIONID")
+  species_data <- filter(dataset__, SPECIES_CODE==species_code, 
+                         Sex==sex)
+  corrected_lengths <- get_unbiased_lengths(species_data, 
+                      age.name="AGE", length.name = "LENGTH..cm.",
+                      year.name = "YEAR", 
+                      station.name = "STATIONID")
   corrected_age<- data.frame(cbind(row.names(corrected_lengths),select(corrected_lengths, age)))
   names(corrected_age) <- c("ID", "lengths")
-  
-  renames_set =  data_process(species_data, renames, id.vars=c("Year", "station"), response="length", 
+  corrected_age <- filter(corrected_age, lengths>0)
+  species_age = species_data %>% filter(AGE==age)
+
+  renames_set =  data_process(species_age, renames, 
+                              id.vars=c("Year", "station"), response="length", 
                                                null.values=c("Vessel", "AreaSwept_km2"),
-                                               YEAR, STATIONID, START_LATITUDE, START_LONGITUDE, LENGTH..cm.)
+                                               YEAR, STATIONID, START_LATITUDE, START_LONGITUDE, LENGTH..cm., GEAR_DEPTH, GEAR_TEMPERATURE)
   
-  Data_Geo<- left_join(renames_set, corrected_age, by="ID") %>% select(Year, station, Lat, Lon, AreaSwept_km2,Vessel, Catch_KG= lengths)
+  Data_Geo<- left_join(renames_set, corrected_age, by="ID") %>% select(Year, station, Lat, Lon, AreaSwept_km2,Vessel, depth, temp, Catch_KG= lengths)
   return(Data_Geo)
 }
