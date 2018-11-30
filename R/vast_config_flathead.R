@@ -24,7 +24,7 @@ strata.limits <- data.frame('STRATA'="All_areas")
 
 #Set region and species
 Region = "Eastern_Bering_Sea"
-Species_set = c(21720) 
+Species_set = c(10130) 
 strata.limits <- data.frame('STRATA'="All_areas")
 
 #We then set the location for saving files.

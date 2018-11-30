@@ -1,11 +1,10 @@
 run_one_spp <- function(Data_Geostat, config_file, folder_name,
-                        covar_columns){
+                        covar_columns=NA){
   orig_dat <- Data_Geostat
   setwd(here())
   source(paste0("R/",config_file))
   
-  Extrapolation_List = FishStatsUtils::make_extrapolation_info( Region=Region, strata.limits=strata.limits )
-  
+  Extrapolation_List = FishStatsUtils::make_extrapolation_info( Region="Eastern_Bering_Sea", strata.limits=strata.limits )
   Spatial_List = FishStatsUtils::make_spatial_info(grid_size_km=grid_size_km, n_x=n_x, Method=Method, 
                                                    Lon=Data_Geostat[,'Lon'], Lat=Data_Geostat[,'Lat'], 
                                                    Extrapolation_List=Extrapolation_List, 
@@ -14,7 +13,8 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
                                                    DirPath=DateFile, Save_Results=FALSE)
   # Add knots to Data_Geostat
   Data_Geostat = cbind( Data_Geostat, "knot_i"=Spatial_List$knot_i )
-  
+
+  if(!is.na(covar_columns)){
   covsperknot <- suppressMessages(FishStatsUtils::format_covariates(
     Lat_e = orig_dat$Lat,
     Lon_e = orig_dat$Lon,
@@ -37,6 +37,17 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
                     "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = rep(0,nrow(Data_Geostat)),
                     "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList, 
                     "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options, X_xtp = X_xtp)
+  } else{
+    
+    save.image(file="example.RData")
+    TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
+                      "RhoConfig"=RhoConfig, "ObsModel"=ObsModel, 
+                      "b_i"=Data_Geostat[,'Catch_KG'], "a_i"=Data_Geostat[,'AreaSwept_km2']+1, 
+                      "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = rep(0,nrow(Data_Geostat)),
+                      "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList, 
+                      "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options)
+  }
+  
   
   TmbList = Build_TMB_Fn("TmbData"=TmbData, "RunDir"=DateFile, "Version"=Version, "RhoConfig"=RhoConfig, 
                          "loc_x"=Spatial_List$loc_x, "Method"=Method)

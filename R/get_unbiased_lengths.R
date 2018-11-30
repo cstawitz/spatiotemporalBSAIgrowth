@@ -4,15 +4,18 @@
 #'@param age_lengths a 3 dimensional array matrix with the rows corresponding to the number of length categories,
 #' columns corresponding to number of ages+1, and depth corresponding to years. The last column is the number of unaged fish.
 #'@return a matrix of mean ages per year
-get_unbiased_lengths <- function(dataset__, age.name, length.name, year.name, station.name){
+get_unbiased_lengths <- function(dataset__, age.name, length.name, year.name, lat.name, lon.name){
   #initialize dimension scalars
   l <- round(select(dataset__,length.name),0)
   length_groups <- min(l):max(l)
   ages <- min(select(dataset__,age.name), na.rm=T):max(select(dataset__,age.name), na.rm=T)
 
   #aggregate data by station & year
-  bystation_yr<- dataset__ %>% filter(!!sym(station.name)!="") %>%
-    mutate("ID"=paste(!!sym(year.name), !!sym(station.name), sep="_")) %>%
+  bystation_yr<- dataset__ %>% 
+    mutate(lat = round(!!sym(lat.name),2), 
+           lon=round(!!sym(lon.name),2)) %>%
+    mutate("ID"=paste(!!sym(year.name), lat, lon, 
+                      sep="_")) %>%
     group_by(ID, !!sym(age.name), "r.length" = round(!!sym(length.name),0), add=T) %>%
     summarise("sample.size"=n(), "mean.l"=mean(!!sym(length.name)))
 

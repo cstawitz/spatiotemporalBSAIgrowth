@@ -6,7 +6,7 @@ n_x = c(50, 100, 250, 500, 1000, 2000)[2] # Number of stations
 Kmeans_Config = list( "randomseed"=1, "nstart"=100, "iter.max"=1e3 )
 
 #Model settings
-FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=1, "Epsilon2"=1) 
+FieldConfig = c("Omega1"=0, "Epsilon1"=0, "Omega2"=1, "Epsilon2"=0) 
 RhoConfig = c("Beta1"=0, "Beta2"=0, "Epsilon1"=0, "Epsilon2"=0) 
 OverdispersionConfig = c("Delta1"=0, "Delta2"=0)
 
@@ -23,8 +23,8 @@ Options =  c("SD_site_density"=0, "SD_site_logdensity"=0,
 strata.limits <- data.frame('STRATA'="All_areas")
 
 #Set region and species
-Region = "Eastern_Bering_Sea"
-Species_set = c(21720) 
+Region = "eastern_bering_sea"
+Species_set = c(10130) 
 strata.limits <- data.frame('STRATA'="All_areas")
 
 #We then set the location for saving files.
