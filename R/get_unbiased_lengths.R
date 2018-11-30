@@ -2,9 +2,10 @@
 #'@description A function that takes a dataset and an age-length sample size matrix and returns unbiased mean lenghts at age
 #'@param dataset__ a dataset containing age and length data
 #'@param age_lengths a 3 dimensional array matrix with the rows corresponding to the number of length categories,
+#'@param l.bin the size of the length bins used to stratify  - 0 means 1 cm, -1 means 10 cm
 #' columns corresponding to number of ages+1, and depth corresponding to years. The last column is the number of unaged fish.
 #'@return a matrix of mean ages per year
-get_unbiased_lengths <- function(dataset__, age.name, length.name, year.name, lat.name, lon.name){
+get_unbiased_lengths <- function(dataset__, age.name, length.name, year.name, lat.name, lon.name, l.bin = 0){
   #initialize dimension scalars
   l <- round(select(dataset__,length.name),0)
   length_groups <- min(l):max(l)
@@ -16,7 +17,7 @@ get_unbiased_lengths <- function(dataset__, age.name, length.name, year.name, la
            lon=round(!!sym(lon.name),2)) %>%
     mutate("ID"=paste(!!sym(year.name), lat, lon, 
                       sep="_")) %>%
-    group_by(ID, !!sym(age.name), "r.length" = round(!!sym(length.name),0), add=T) %>%
+    group_by(ID, !!sym(age.name), "r.length" = round(!!sym(length.name),digits = l.bin), add=T) %>%
     summarise("sample.size"=n(), "mean.l"=mean(!!sym(length.name)))
 
 #Function to get unbiased lengths for each station and year
