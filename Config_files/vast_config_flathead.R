@@ -11,7 +11,7 @@ RhoConfig = c("Beta1"=0, "Beta2"=0, "Epsilon1"=0, "Epsilon2"=0)
 OverdispersionConfig = c("Delta1"=0, "Delta2"=0)
 
 #Lognormal instead of normal?
-ObsModel = c(1,3)   
+ObsModel = c(1,4)   
 
 #Postprocessing
 Options =  c("SD_site_density"=0, "SD_site_logdensity"=0, 

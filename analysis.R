@@ -6,14 +6,11 @@ source("vast_config.R")
 library(VAST)
 library(compiler)
 library(dplyr)
-Version = "VAST_v5_3_0"
+devtools::install_github("james-thorson/FishStatsUtils")
+devtools::install_github("james-thorson/VAST", ref = "aef723c78873fbeaf442b680a77cb8647621f499")
+Version = get_latest_version()
 
-check_dat <- function(sp_code){
-tmp<-filter(clean_data, SPECIES_CODE==sp_code)
-png(paste0("datacheck",sp_code,".png"))
-plot(LENGTH..cm.~AGE, data=tmp)
-dev.off()
-}
+
 check_dat(10261)
 spp<- unique(clean_data$SPECIES_CODE)
 lapply(spp,check_dat)
@@ -57,8 +54,11 @@ Data_Geostat <- arrow
 
 
 
-run_one_spp(pcod, config_file="vast_config_pcod.R",
-            folder_name="pcod_spatiot")
+run_one_spp(flathead, config_file="vast_config_flathead.R",
+            folder_name="flathead_spatio")
+
+run_one_spp(arrow, config_file="vast_config_arrowtooth.R",
+            folder_name="arrow_spatio")
 
 
 #Best pollock model for largest sample size
