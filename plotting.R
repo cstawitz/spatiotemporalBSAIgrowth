@@ -1,3 +1,10 @@
+sp.codes <- unique(clean_data$SPECIES_CODE)
+for(i in 1:length(sp.codes)){
+  sp.data <- clean_data %>% filter(SPECIES_CODE==sp.codes[i])
+png(paste("Locs",sp.codes[i],".png"))
+plot(START_LATITUDE~START_LONGITUDE, data=sp.data, xlim=c(-180,-150))
+dev.off()
+}
 
 yrs <- unique(substr(rownames(pol.lengths),1,4))
 row.index <- lapply(1:length(yrs), function(x) which(substr(rownames(pol.lengths),1,4)==yrs[x]))

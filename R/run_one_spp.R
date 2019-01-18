@@ -25,30 +25,32 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
     FUN = mean,
     Year_Set = seq(min(unique(orig_dat$Year)),max(unique(orig_dat$Year))),
     na.omit = "time-average"))
-  browser()
   #X_xtp <- array(data=NA, dim=c(100,33,2))
-  X_xtp <- apply(covsperknot$Cov_xtp, 2:3, scale)
+#  X_xtp <-apply(covsperknot$Cov_xtp, 2:3, scale)
+  X_xtp <-covsperknot$Cov_xtp/mean(covsperknot$Cov_xtp)
   #X_xtp[, , 2] <- scale(exp(Dens_xt))
   dimnames(X_xtp)[[1]] <- dimnames(covsperknot$Cov_xtp)[[1]]
-   # save(Version, FieldConfig, RhoConfig,
-   #      ObsModel, Data_Geostat, Spatial_List,
-   #      Options, DateFile, Method, X_xtp,
-   #      file="function_arrowtooth.RData")
 
-  Xconfig_zcp = TmbData$Xconfig_zcp
-  Xconfig_zcp[1,,] = 0
+
+ 
   
   TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
                     "RhoConfig"=RhoConfig, "ObsModel"=ObsModel,
                     "b_i"=Data_Geostat[,'Catch_KG'], "a_i"=Data_Geostat[,'AreaSwept_km2']+1,
                     "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = rep(0,nrow(Data_Geostat)),
                     "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList,
-                    "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options, X_xtp=X_xtp, Xconfig_zcp=Xconfig_zcp)
+                    "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options, X_xtp=X_xtp)
+  Xconfig_zcp = TmbData$Xconfig_zcp
+  Xconfig_zcp[1,,] = 0
+  
+  TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
+                    "RhoConfig"=RhoConfig, "ObsModel"=ObsModel,
+                    "b_i"=Data_Geostat[,'Catch_KG'], "a_i"=Data_Geostat[,'AreaSwept_km2']+1,
+                     "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = rep(0,nrow(Data_Geostat)),
+                     "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList,
+                     "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options, X_xtp=X_xtp, Xconfig_zcp = Xconfig_zcp)
   } else{
-    save(Version, FieldConfig, RhoConfig,
-              ObsModel, Data_Geostat, Spatial_List,
-              Options, DateFile, Method,
-         file="function_arrowtooth.RData")
+
     TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
                       "RhoConfig"=RhoConfig, "ObsModel"=ObsModel, 
                       "b_i"=Data_Geostat[,'Catch_KG'], "a_i"=Data_Geostat[,'AreaSwept_km2']+1, 
@@ -56,14 +58,21 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
                       "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList, 
                       "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options,
                       Aniso=1)
+    Xconfig_zcp = TmbData$Xconfig_zcp
+    Xconfig_zcp[1,,] = 0
+    
+    TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
+                      "RhoConfig"=RhoConfig, "ObsModel"=ObsModel,
+                      "b_i"=Data_Geostat[,'Catch_KG'], "a_i"=Data_Geostat[,'AreaSwept_km2']+1,
+                      "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = rep(0,nrow(Data_Geostat)),
+                      "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList,
+                      "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options, Xconfig_zcp = Xconfig_zcp)
   }
   
-  browser()
   TmbList = Build_TMB_Fn("TmbData"=TmbData, "RunDir"=DateFile, "Version"=Version, "RhoConfig"=RhoConfig, 
                          "loc_x"=Spatial_List$loc_x, "Method"=Method)
   Obj = TmbList[["Obj"]]
-  TMBhelper::Check_Identifiable(obj = Obj)
-  browser()
+
   Opt = TMBhelper::Optimize(obj=Obj, lower=TmbList[["Lower"]], upper=TmbList[["Upper"]], getsd=TRUE, savedir=DateFile, bias.correct=TRUE, newtonsteps=1, bias.correct.control=list(sd=FALSE, split=NULL, nsplit=1, vars_to_correct="Index_cyl"))
   #, control = list(abs.tol = 1e-20))
 
