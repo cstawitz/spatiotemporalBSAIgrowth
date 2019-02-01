@@ -1,36 +1,246 @@
 ---
-title: "Manuscript"
-author:-name: Christine C. Stawitz
--name: James T. Thorson
-date: "October 16, 2018"
-output: word_document
-  pandoc_args: ["-Fpandoc-crossref"]
+title: "Detecting trends in size-at-age with spatio-temporal models."
+
+author: |
+  | Christine C. Stawitz^[Corresponding author: christine.stawitz@noaa.gov] $^1$, 
+  James T. Thorson $^2$, Paul D. Spencer $^2$, Timothy E. Essington $^3$, Anne D. Hollowed $^2$
+  | $^1$ECS Federal in support of NOAA Fisheries,
+  $^2$NOAA Alaska Fisheries Science Center,
+  $^3$University of Washington School of Aquatic and Fishery Sciences
+
+header-includes:
+    - \usepackage{setspace}\doublespacing
+    - \usepackage[nomarkers]{endfloat}    
+    - \usepackage{lineno}
+    - \linenumbers
+    
+documentclass: book
+date: "February 1, 2019"
+site: "bookdown::bookdown_site"
+output:
+  bookdown::pdf_book:
+    keep_tex: yes
+    toc: no
+fig_caption: yes
+    
+
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.pos = 'p') # Places figures on their own pages
+knitr::opts_chunk$set(out.width = '100%', dpi=300)
+options(xtable.comment = FALSE)
+library(bookdown)
+require(xtable)
+require(here)
+require(ggplot2)
+require(colorspace)
+require(MARSS)
+require(broom)
+require(plyr)
+require(xtable)
+source("./R/color_palette.R")
+
+tot_years <- 1982:2018
+spp.names <- c("P. cod", "pollock",
+               "yellowfin", "N. rock sole", "arrowtooth", "flathead")
+bold.somerows <- 
+        function(x){ gsub('BEST(.*)',paste('\\\\textbf{\\1','}'),x)}
 ```
 
-## Methods
+## Abstract {-}
+To prepare for climate change, we seek a better understanding of mechanistic links between fish life history processes and climate drivers. If multiple stocks within a large marine ecosystem (LME) exhibit similar temporal patterns, this might provide stronger evidence of an ecosystem response than temporal variability observed in an individual species’ data. However, fish populations are often examined at the large marine ecosystem (LME) scale, and spatial variability within LMEs can obfuscate temporal signals of climate response in fisheries data. Here, we estimate trends in body size of six groundfish species within the Bering Sea ecosystem in a model accounting for spatial and spatio-temporal random effects. From the best model chosen for each species (4/6 including spatio-temporal random effects), we extracted and compared estimated interannual size trends between species to identify common patterns. We observed significant correlations between the estimated temporal patterns for some pairs of species (Pacific cod and walleye pollock; Pacific cod and yellowfin sole), so we then used dynamic factor analysis to identify synchrony between extracted trends. Model selection using AICc suggested one shared temporal trend between three species (Pacific cod, walleye pollock, and yellowfin sole) and a negative influence of this trend on a fourth species (flathead sole) best explained these shared patterns. The shared trend towards smaller body size-at-age from 1982-2004 and larger size-at-age from 2005 – 2017 could indicate a shared response to ecosystem shifts. However, the trend we observed was not significantly related to mean bottom temperature or the size of the cold pool area of the Bering Sea. These shared patterns were only observed when spatial covariance was accounted for, suggesting accounting for spatial and spatio-temporal variance in fisheries data is important when searching for synchrony in multi-species response to climate. 
 
-We analyzed mean length-at-age for a number of Eastern Bering Sea species: walleye pollock (*Gadus chalcogrammus*), Pacific cod (*Gadus macrocephalus*), and arrowtooth flounder (*Atheresthes stomas*). Species were chosen as they have databases of fishery-independent length and age data dating back to 1982, substantial information on diet preferences, and are commercially and/or ecologically important to the region. We fit a spatio-temporal model to average length by year and region for each species using the VAST (Vector Autoregressive Spatio-Temporal) R package incorporating environmental covariates hypothesized to be important drivers of body size based on previous research. 
+## Methods {-}
 
-# Data
+We analyzed mean length-at-age for a number of Eastern Bering Sea species: Pacific cod (*Gadus macrocephalus*), walleye pollock (*Gadus chalcogrammus*), yellowfin sole (*Limanda aspera*), Northern rock sole(*Lepidopsetta polyxystra*), arrowtooth flounder (*Atheresthes stomas*), and flathead sole(*Hippoglossoides elassodon*). Species were chosen as they are distributed throughout the Eastern Bering Sea large marine ecosystem, have databases of fishery-independent length and age samples dating back to 1982, and are commercially and/or ecologically important to the region. We fit a spatio-temporal model to average length by year for each species using the VAST (Vector Autoregressive Spatio-Temporal) R package, which allows for simultaneous estimation of spatial and spatio-temporal random effects. We then used Dynamic Factor Analysis to estimate if there were shared trends between the annual estimates of mean growth from the best spatio-temporal models for each species.  
 
-Fishery-independent length and age data were extracted from the Bering Sea survey conducted annually by the National Oceanic and Atmospheric Administration’s trawl survey. The data extracted included measured length, age, sex, and weight of each sampled fish, in addition to haul-specific data on the start latitude, longitude, and survey station, temperature and depth, and gear-specific data on the gear type and net width used to collect fish. 
+### Data {-}
 
-# Model fitting
+Fishery-independent length and age data were extracted from the Bering Sea and Aleutian Islands' surveys conducted annually by the National Oceanic and Atmospheric Administration's Alaska Fisheries Science Center. The data extracted included measured length, age, sex, and weight of each sampled fish. Sampling covariates were also extracted for each data point. These covariates include the start latitude, longitude, bottom temperature and depth of each survey trawl tow, in addition to data on the gear type and net width used to collect fish.
 
-We calculated average length-at-age for each year at each survey station, where each survey station represents a unique latitude and longitude pairing from which fish were collected. In some years, ages were collected based on length-stratified sampling, which aged equal numbers of fish from each pre-specified length group. Length groups were pre-specified based on 1 cm bins (confirm in sampling protocol documents). To obtain accurate estimates of population length-at-age, we corrected for the effect of length-stratified ageing as in Bettoli and Miranda (1992). The corrected mean length for each survey station and each year of data for each species *i* was our response variable.
+### Model structure {-}
+
+We calculated average length-at-age for each year at each unique combination of start latitude and longitude of survey tow. In some years, ages were collected based on length-stratified sampling, which aged equal numbers of fish from each pre-specified length group; this can bias estimates of mean  length-at-age. Length groups were pre-specified based on 1 cm bins (confirm in sampling protocol documents). To obtain accurate estimates of population length-at-age, we corrected for the effect of length-stratified ageing as in Bettoli and Miranda (1992). For each species, we selected the age of fish for which the largest sample size of age data were present. The corrected mean length for each location and each year of data for each species *i* was our input data ($b_{l,s,t}$) where $l$ represents each unique sampling latitude and longitude combination, $s$ represents each species, and $t$ is the year of sampling. 
+
+Each species' data was fit independently using the spatiotemporal modeling framework developed by Thorson and Barnett (2017). First, 100 knots were spatially distributed based on the results of a k-means clustering algorithm to minimize the distance between available data ($b_{l,s,t}$) and the nearest knot. This allowed aggregation of the length observations into $i=100$ values ($b_{i,s,t}$) from the total set of >1600 $l$ sampling stations.
+
+The structure of the models was kept as consistent as possible between species. Data were fit using a Poisson-link model (Thorson 2017) with encounter probabilities fixed at 1 (i.e. because all data were non-zero):
+All species' mean length data were fit using a bias-corrected lognormal distribution: 
+
+\begin{equation} 
+b_{i,s,t} \sim \mathrm{Lognormal}\left(r-\frac{sigma_m^2}{2}, \sigma_m^2\right)  
+\end{equation}
 
 
+where the mean is calculated as a Poisson link function of the linear predictor $p_{i,s,t}$:
+\begin{equation}
+r=a_i\mathrm{exp}(p_{i,s,t})
+\end{equation}
 
-## Results
+Where $a_i$ is the area of knot $i$, and $p_{i,s,t}$ is the linear predictor estimated as the following function of annual fixed effects, spatio- and spatio-temporal random effects, and covariates: 
+\begin{equation}
+p_{i,s,t} = \beta_{s,t}+\sum L_{\omega,s}\omega_{i,s} +I_s\sum L_{\varepsilon,s}\varepsilon_{i,s,t} + \sum_{p=1}^{n}\gamma_{p,i,s,t}\mathbf{X_{p,i,s,t}}
+\end{equation}
 
-You can also embed plots, for example:
+Where $p_{i,s,t}$ is the mean length for species $s$ in spatial knot $i$ for year $t$, $\beta_{s,t}$ is the fixed effect denoting the year-specific mean length intercept for each species $s$, $L_{\omega}$ is the scalar value representing the absolute standard deviation of the spatial random effect for each species $s$. $I_s$ is an indicator variable denoting whether spatio-temporal variation is included in the model for species $s$, and $L_{\varepsilon}$ is a scalar value reprenting the standard deviation of the spatio-temporal random effect for each species $s$. $\gamma_p$ is the coefficient on the effect of each covariate matrix $X_p$ on mean length, where $n$ is the total number of covariates.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Spatial and spatio-temporal random effects (when included) were modeled using multivariate normal distributions with mean 0 and constant standard deviations for each species and type of random effect (i.e. spatio- or spatio-temporal):
+\begin{align}
+\omega_s &\sim MVN(0,\mathbf{R_s})\\
+\varepsilon_{s,t} &\sim MVN(0,\mathbf{R_s})
+\end{align}
+Where $R_s$ is the spatial correlation matrix for each species $s$ defined by a Mat\'{e}rn correlation function with smoothness $\phi=1$:
+
+\begin{equation}
+R_s(s_n,s_m)=\frac{1}{2^{\phi-1}\Gamma(\phi)}\times(\kappa_s|\mathbf{d_s}(s_n,s_m)\mathbf{H_s})^{\phi}\times K_{\nu}(\kappa_s|\mathbf{d_s}(s_n,s_m)\mathbf{H_s}|)
+\end{equation}
+
+where $\kappa_s$ is the decorrelation rate (i.e. how quickly spatial correlation between locations decays with distance), $\mathbf{d_s}(s_n,s_m)$ is the matrix containing distances between locations $s_n$ and $s_m$, $\mathbf{H_s}$ is the anisotropy matrix, and $K_\nu$ is the modified Bessel function of the second kind. 
+
+The anisotropy matrix $\mathbf{H_s}$ specifies the degree to which correlations decline at different rates in different directions.  The Eastern Bering Sea is a continental shelf system with persistent fronts dividing the inner (depth<50m), middle (100m>depth>50m), and outer(depth>100m) domains (Coachman et al. 1986). Thus, we expect correlations to decline more quickly traversing from north to south than along the shelf and accounting for geometric anistropy is likely important in this system. $\mathbf{H_s}$ is estimated as 
+\begin{equation}
+H=\begin{bmatrix} exp(h_{s,1}) & h_{s,2}  \\ h_{s,2} & exp(-h_{s,1})(1+h_{s,2}^2) \end{bmatrix} \end{equation}
+
+where $h_{s,1}$ and $h_{s,2}$ are the parameters governing geometric anisotropy.
+
+For all species, we first evaluated whether the inclusion of spatio-temporal random effects was supported. We judged this based on two criteria: the magnitude of the estimated spatio-temporal standard deviation (as measured by the loading value $L_{\varepsilon}$) and the AIC values. In all cases where model selection using AIC did not support the inclusion of spatio-temporal effects, the magnitude of the loading value was very small ($L_{\varepsilon}<1.0E-9$). For all species, the magnitude of the estimated spatial standard deviation ($L_{\omega}$) exceeded 0.01, justifying including spatial random effects. We then examined if the data supported the inclusion of covariates by comparing AIC values between models that did and did not include covariates. For all species, we examined the covariates of mean bottom temperature measured during the tow and mean depth of the tow. 
+
+### Model Fitting and Selection {-}
+All spatiotemporal models were fit using the VAST R package version 7.0.0, which is described in Thorson and Barnett (2017) and available at http://www.github.com/james-thorson/VAST. All models were fit using a spatial mesh with 50km grid resolution and aggregated into 100 knots across the data area. The model was run for a maximum of 1000 iterations, after which we verified convergence by ensuring no estimated parameter gradient exceeded 1E-3. We also verified observed data conformed to a lognormal distribution by comparing the empirical distribution to a simulated lognormal distribution in a Q-Q plot and a density histogram. We chose the "best spatio-temporal model" for each species as the model with the lowest AIC values, or the simpler of models with $\Delta\mathrm{AIC}<2$ if AIC values were very close. All code used to run the analyses in this paper can be found at http://www.github.com/cstawitz/spatiotemporalBSAIgrowth .
+
+### Dynamic Factor Analysis {-}
+The smoothed mean length prediction for each year from the best spatio-temporal models were then examined for shared trends. To get a prediction for each year, we calculated a weighted mean length as
+\begin{equation}
+\hat{w_{s,t}} = \sum_{i=0}^{100}  \frac{\hat{b_{i,s,t}}a_{i,s}}{\sum a_{i,s}}
+\end{equation}
+
+where $\hat{b_{i,s,t}}$ is the model predicted mean length in knot $i$ in year $t$. To ensure models were on similar scales across species, we then z-scored the $\hat{w_t}$ vectors for each species. We then used dynamic factor analysis (DFA) to estimate which alternative number of shared underlying trends $\mathbf{x_t}$ most parsimoniously described the six extracted prediction time series $\mathbf{\hat{w}}$.
+
+\begin{align}
+\mathbf{x_t} & =  \mathbf{x_{t-1}}+\mathbf{u_t} \\
+\mathbf{\hat{w_t}} & =  \mathbf{Z}\mathbf{x_t}+\mathbf{v_t}\\
+\mathbf{u_t} & \sim MVN(0,\mathbf{Q})\\
+\mathbf{v_t} & \sim MVN(0,\mathbf{R})\\
+\mathbf{x_0} & \sim MVN(0,5)
+\end{align}
+
+Where $\mathbf{u_t}$ and $\mathbf{v_t}$ are the process and observation error respectively, $\mathbf{Q}$ and $\mathbf{R}$ are the covariance matrices of the multivariate normal distributions describing process and observation error, respectively. To make the parameters identifiable, $\mathbf{Q}$ is set to the identity matrix, i.e. constraining the process errors for each state in $\mathbf{x_t}$ to be i.i.d following a standard normal distribution. The initial state vector is set to follow a $MVN(\mathbf{0},\mathbf{5})$ distribution following Zuur et al. (2003).  
+
+We explored 7 alternative models, corresponding to $1,\dots,4$ trends describing the data with $\mathbf{R}$ matrices that were diagonal and equal, a model with one trend and a diagonal and unequal  $\mathbf{R}$ matrix, one model each with one trend and one covariate (size of the Bering Sea cold pool area, mean Bering Sea temperature). We then used AICc to evaluate which number of trends, observation error matrix structure, and covariates were best supported by the data. Although AICc is known to exhibit bias in preferentially selecting complex time series models, our model selection results favored the simplest model so we assumed AICc was sufficient.
+ 
+## Results {-}
+
+### Spatio-temporal models {-}
+
+The data supported including spatio-temporal random effects for 4 out of 6 stocks, and sampling depth was the external covariate most often found to be influential (3/6 stocks) (Table 1). The model with the lowest AIC for each species included spatio-temporal variation for Pacific cod, walleye pollock, Northern rock sole, and flathead sole. Because all of the estimated spatial variances exceeded 0.01, we did not examine models excluding spatial covariation. The inclusion of environmental covariates was not supported by the data for two of the most data-rich species (Pacific cod, walleye pollock). For the other two species that exhibited spatio-temporal variation, an environmental covariate (sampling depth for Northern rock sole, sampling temperature for flathead sole) was chosen by model selection to be influential. For two species (arrowtooth flounder, yellowfin sole), the variance of spatio-temporal variation was estimated to be smaller than $1E-06$ and was not included; however, model selection supported inclusion of sampling depth as a covariate in the best models for these species. The magnitude of the coefficient on environmental covariates (i.e. depth and temperature) was always <0.2, suggesting these do not have a strong effect on observed length even when their inclusion is supported by model selection. All of the coefficients on covariates included in the best chosen model for each species were positive, e.g. body size is estimated to increase with greater bottom temperature and greater depth.
+
+Predicted spatial patterns of length differed between species. Three species (Pacific cod, Northern rock sole, and yellowfin sole) were predicted to increase in size towards the northwest, following the Bering Sea shelf edge. Walleye pollock showed an opposite pattern, with individuals predicted to be larger-at-age more inshore. The best chosen model for flathead sole predicted larger individuals in the south east, with size decreasing to the north and west. Arrowtooth flounder showed nearly the opposite pattern, with the largest predicted size in the northwest, although temporal variability in size of arrowtooth flounder was much greater than estimated spatial variability. 
+
+Two of the model set chosen to test had poor convergence. A model including spatial covariation and a temperature covariate for arrowtooth flounder did not converge. The model including spatio-temporal covariation and a depth covariate for Northern rock sole produced a positive-definite Hessian, but the maximum gradient had a magnitude of 0.15, suggesting the model may not be converged. Attempting to scale the temperature and depth covariates in alternative ways (i.e. z-scoring, centering) for these two models did not improve convergence.
+
+### Potential synchrony {-}
+
+The z-scored prediction of mean length by year from the best model for each species is shown in Figure 1. In these predictions, a number of species (walleye pollock, yellowfin sole, Pacific cod) are shown to have predicted smaller lengths (scaled length < 0) in the period from 1985-1990, while being comparably larger from 2010-2013. A Pearson's correlation test suggested significant correlations between walleye pollock and Pacific cod ($\rho=0.38$), and Pacific cod and yellowfin sole ($\rho=0.39$) (Table 2). For this reason, we used dynamic factor analysis to examine if there was a shared trend between species and if this trend was related to climate drivers.
+
+The best chosen model from our dynamic factor analysis estimated one common trend and equivalent growth variances between species when fit to the scaled length predictions (Table 3). Neither of the two examined environmental covariates (annual mean temperature and annual cold pool area of the Bering Sea) were chosen by model selection as significant to include in the DFA models. The estimated shared trend showed a decreasing growth state from 1983 to a low in 1989-1900, followed by an increase to mean growth in 1993-1995 and a subsequent decrease to another low period of growth in 1999. From 2005 onward, the growth trend increased to a maximum in 2010, followed by a decline in recent years. Three species were shown to have significant positive loadings on this shared trend (walleye pollock: estimate: 0.28, 95% confidence interval: [0.08-0.48]; Pacific cod: 0.34, [0.13-0.54]; yellowfin sole: 0.21, [0.05-0.37]). One species was shown to have a significant negative loading on this shared trend (flathead sole: -0.23, [-0.43--0.04]). Two species were shown to have insignificant loadings on this trend (Northern rock sole: 0.04, [-0.10-0.19] and arrowtooth flounder: -0.09, [-0.30-0.11]). Fits of the best DFA model to the scaled length predictions are shown in Figure 3.
+
+```{r echo=FALSE, results="asis"}
+folders <- list.dirs(".", recursive=FALSE)
+out_folders <- folders[grep("poisson",folders)]
+outfiles <- paste0(out_folders,"/Save.RData")
+source("./R/create_est_table.R")
+out_df<-get_aic_tables(outfiles)
+out_df <- out_df[order(out_df$AIC),]
+rownames(out_df) <- c("BEST N. rock sole, ST, D", 
+                 "N. rock sole, ST",
+                 "N. rock sole, S",
+                 "N. rock sole, ST, T",
+                 "BEST Flathead, ST, T",
+                 "Flathead, ST, D",
+                 "Flathead, ST",
+                 "Flathead, S",
+                 "BEST Arrowtooth, S, D",
+                 "Arrowtooth, S",
+                 "Arrowtooth, ST",
+                 "BEST Yellowfin, S, D",
+                 "Yellowfin, S",
+                 "Yellowfin, S, T",
+                 "Yellowfin, ST",
+                 "BEST Pollock, ST",
+                 "Pollock, ST, D",
+                 "Pollock, ST,T",
+                  "Pollock, S",
+                 "BEST P. cod, ST",
+                 "P. cod, ST, T",
+                 "P. cod, ST, D",
+                 "P. cod, S")
+mod.table<- xtable(out_df, digits=3, format="latex", caption="Estimated parameter values, AIC values, and maximum gradient of estimated parameters. Values of 0 in the gamma column denote covariates are not included in this model. Name denotes the model configuration, where 'S' refers to models including spatial covariance only, 'ST' refers to models including spatio-temporal covariance, and 'D' and 'T' denote including tow depth and tow temperature covariates, respectively.")
+display(mod.table)[c(1:6,8)] <- "e"
+print(mod.table, sanitize.rownames.function=bold.somerows)
+```
+```{r echo=FALSE, results="asis"}
+load("Correlation.RData")
+cor_mat <- data.frame(round(cor_mat,3))
+cor_mat[] <- lapply(cor_mat, as.character)
+cor_mat[1,2] <- paste0("BEST", cor_mat[1,2])
+cor_mat[2,3] <- paste0("BEST", cor_mat[2,3])
+colnames(cor_mat) = spp.names
+rownames(cor_mat) = spp.names[-6]
+
+cor.x<-xtable(cor_mat, format="latex",caption ="Pearson's correlation between scaled length trends. Bold values denote significance at p<0.05 level.")
+print(cor.x, sanitize.text.function=bold.somerows)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r echo=FALSE, results="asis"}
+load("DFAAICc.RData")
+AICcdf <- data.frame(c("BEST One trend, equal var",
+                  "Two trends, equal var",
+                  "Three trends, equal var",
+                  "One trend, equal var, temp covariate",
+                  "One trend, unequal var",
+                  "One trend, equal var, cold pool covariate",
+                  "Four trends, equal var"),
+                sort(AICCvals))
+
+colnames(AICcdf) <- c("Model structure", "AICc")
+
+xaic<-xtable(AICcdf, digits=3, format="latex", caption="AICc values from alternative dynamic factor analysis models fit to scaled length trends.")
+display(xaic)[2] <- "e"
+print(xaic, include.rownames=FALSE, sanitize.text.function=bold.somerows) 
+```
+
+
+```{r plottrends, echo=FALSE, fig.cap="Scaled weighted annual mean length predictions from best VAST model for Pacific cod (mauve), walleye pollock (brown), yellowfin sole (green), Northern rock sole (teal), arrowtooth flounder (blue), and flathead sole (purple)."}
+source("trendplot.R")
+```
+
+```{r DFAloadings, echo=FALSE, fig.cap="A. Estimated state that best describes extracted annual growth trend and B. loadings of each species prediction on state vector."}
+source("DFA_loadings_trend.R")
+```
+
+```{r DFAfits, echo=FALSE, warning=FALSE,message=FALSE, , fig.cap="Fits of DFA model (line) with confidence interval (shaded region) to extracted annual mean length prediction for each species (points)."}
+
+source("DFA_fits.R")
+```
+
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{Figures/MatPlot_Data.png}
+  \caption{Trends if using only mean length-at-age}
+  \label{fig:matdata}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{Figures/DFA_if_using_Data.png}
+  \caption{DFA results if using only mean length-at-age}
+  \label{fig:DFAloaddata}
+\end{figure}
+
+\begin{figure}
+  \includegraphics[width=\linewidth]{Figures/DFAOut_data.png}
+  \caption{Fits to DFA if using only mean length-at-age data}
+  \label{fig:DFAfitsdata}
+\end{figure}
