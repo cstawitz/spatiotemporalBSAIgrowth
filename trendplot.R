@@ -3,12 +3,14 @@ load("input_data.RData")
 bestmods <- c("pcod_spatiotemp_poisson", "Pollock_Spatiotemp_Poisson", "yellowfin_spatio_poisson_depth", "nrock_spatiotemp_poisson_depth", "arrow_spatio_poisson_depth", "flathead_spatiotemp_poisson_temp")
 
 filedirs<-paste0("./",bestmods, "/Save.RData")
+mapdatas <- paste0("./", bestmods,"/MapDetails.RData")
 sd_vect <- paramest <- ts <- vector("list")
 "%w/o%" <- function(x, y) x[!x %in% y] #--  x without y
 tot_years <- 1982:2018
 spp.names <- c("P. cod", "pollock",
                "yellowfin", "N. rock sole", "arrowtooth", "flathead")
 pred_length <- matrix(nrow=6, ncol=length(tot_years))
+pred_space <- matrix(nrow=6, ncol=100)
 for(i in 1:6){
   load(filedirs[i])
   Year_Set = seq(min(data_list[[i]][,'Year']),max(data_list[[i]][,'Year']))
@@ -19,7 +21,8 @@ for(i in 1:6){
     new_mat[,,j] <- t(Save$TmbData$a_xl)*(Save$Report$D_xcy[,,j])/sum(t(Save$TmbData$a_xl))
   }
   total_d <- apply(new_mat,3,mean)
-  
+  #spatial_d <- apply(Save$TmbData$D_xcy,1,mean)
+  #pred_space[i,] <- spatial_d/max(spatial_d)
   ts[[i]] <- total_d/max(total_d)
   ind <- which(tot_years %in% Year_Set[Years2Include])
   pred_length[i,ind] <- total_d[Years2Include]

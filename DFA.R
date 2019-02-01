@@ -1,4 +1,9 @@
 library(MARSS)
+
+
+cold_pool<-read.csv("./data/cpa_areas2018.csv")
+
+
 mm <- 3
 ## 'BB' is identity: 1's along the diagonal & 0's elsewhere
 BB <- "identity"  # diag(mm)
@@ -33,6 +38,7 @@ init_list <- list(x0 = matrix(rep(0, mm), mm, 1))
 ## list with model control parameters
 con_list <- list(maxit = 5000, allow.degen = TRUE)
 require(MARSS)
+load("pred_length.RData")
 dfa_3 <- MARSS(y = pred_length, model = mod_list, inits = init_list, 
                control = con_list)
 
@@ -52,11 +58,11 @@ mod_list <- list(B = BB,  Q = QQ,
                  tinitx=1)
 dfa_1_equal_cpa <- MARSS(y = pred_length, model = mod_list, inits = init_list, 
                          control = con_list, form="dfa",
-                         covariates=t(scale_area))
+                         covariates=t(scale(cold_pool$AREA_SUM_LTE2)))
 
 dfa_1_equal_meant <- MARSS(y = pred_length, model = mod_list, inits = init_list, 
                            control = con_list, form="dfa",
-                           covariates=t(scale(meant)))
+                           covariates=t(scale(cold_pool$TEMP)))
 
 ## list with model inits
 init_list <- list(x0 = matrix(rep(0, mm), mm, 1))
@@ -70,6 +76,7 @@ dfa_1 <- MARSS(y = pred_length, model = mod_list, inits = init_list,
                control = con_list)
 
 
+RR <- "diagonal and equal"
 mm <- 2
 Z_vals <- list("z11", "z12","z21","z22", "z31","z22","z41", "z42", "z51", "z52", "z61", "z62")
 init_list <- list(x0 = matrix(rep(0, mm), mm, 1))
@@ -93,6 +100,7 @@ dfa_4 <- MARSS(y = pred_length, model = mod_list, inits = init_list,
 
 mod.list
 
-which.min(c(dfa_1$AICc, dfa_1_equal$AICc,dfa_2$AICc, dfa_3$AICc, dfa_4$AICc))
+AICCvals<-c(dfa_1$AICc, dfa_1_equal$AICc,dfa_1_equal_cpa$AICc, dfa_1_equal_meant$AICc, dfa_2$AICc, dfa_3$AICc, dfa_4$AICc)
 
 save(dfa_1_equal, file="BestDFAObj.RData")
+save(AICCvals, file="DFAAICc.RData")

@@ -27,13 +27,12 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
     na.omit = "time-average"))
   #X_xtp <- array(data=NA, dim=c(100,33,2))
 #  X_xtp <-apply(covsperknot$Cov_xtp, 2:3, scale)
-  X_xtp <-covsperknot$Cov_xtp/mean(covsperknot$Cov_xtp)
+  X_xtp <-(covsperknot$Cov_xtp/mean(covsperknot$Cov_xtp))
   #X_xtp[, , 2] <- scale(exp(Dens_xt))
   dimnames(X_xtp)[[1]] <- dimnames(covsperknot$Cov_xtp)[[1]]
 
 
  
-  
   TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
                     "RhoConfig"=RhoConfig, "ObsModel"=ObsModel,
                     "b_i"=Data_Geostat[,'Catch_KG'], "a_i"=Data_Geostat[,'AreaSwept_km2']+1,
@@ -72,8 +71,7 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
   TmbList = Build_TMB_Fn("TmbData"=TmbData, "RunDir"=DateFile, "Version"=Version, "RhoConfig"=RhoConfig, 
                          "loc_x"=Spatial_List$loc_x, "Method"=Method)
   Obj = TmbList[["Obj"]]
-
-  Opt = TMBhelper::Optimize(obj=Obj, lower=TmbList[["Lower"]], upper=TmbList[["Upper"]], getsd=TRUE, savedir=DateFile, bias.correct=TRUE, newtonsteps=1, bias.correct.control=list(sd=FALSE, split=NULL, nsplit=1, vars_to_correct="Index_cyl"))
+  Opt = TMBhelper::Optimize(obj=Obj, lower=TmbList[["Lower"]], upper=TmbList[["Upper"]], getsd=TRUE, savedir=DateFile, bias.correct=TRUE, newtonsteps=1, bias.correct.control=list(sd=FALSE, split=NULL, nsplit=1, vars_to_correct="Index_cyl"), loopnum=5)
   #, control = list(abs.tol = 1e-20))
 
   OutFile = paste0(getwd(),"/",folder_name)
@@ -116,6 +114,8 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
   ParHat <- Save$ParHat
 
   Dens_xt = plot_maps(plot_set=c(3), MappingDetails=MapDetails_List[["MappingDetails"]], Report=Report, Sdreport=Opt$SD, PlotDF=MapDetails_List[["PlotDF"]], MapSizeRatio=MapDetails_List[["MapSizeRatio"]], Xlim=MapDetails_List[["Xlim"]], Ylim=MapDetails_List[["Ylim"]], FileName=DateFile, Year_Set=Year_Set, Years2Include=Years2Include, Rotate=MapDetails_List[["Rotate"]], Cex=MapDetails_List[["Cex"]], Legend=MapDetails_List[["Legend"]], zone=MapDetails_List[["Zone"]], mar=c(0,0,2,0), oma=c(3.5,3.5,0,0), cex=1.8, plot_legend_fig=FALSE)
+  
+  save(MapDetails_List, file="MapDetails.RData")
   
   Dens_DF = cbind( "Density"=as.vector(Dens_xt), "Year"=Year_Set[col(Dens_xt)], "E_km"=Spatial_List$MeshList$loc_x[row(Dens_xt),'E_km'], "N_km"=Spatial_List$MeshList$loc_x[row(Dens_xt),'N_km'] )
   

@@ -52,7 +52,12 @@ require(broom)
 require(ggplot2)
 require(plyr)
 
+folders <- list.dirs(".", recursive=FALSE)
+out_folders <- folders[grep("poisson",folders)]
+outfiles <- paste0(out_folders,"/Save.RData")
+get_aic_tables(outfiles)
 
+get_aic_tables(filedirs)
 
 dev.off()
 png("pollockvyellowfin.png")

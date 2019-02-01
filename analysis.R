@@ -2,7 +2,7 @@
 source("setup_pkgs.R")
 #########################
 
-source("vast_config.R")
+source("Config_files/vast_config.R")
 library(VAST)
 library(compiler)
 library(dplyr)
@@ -60,8 +60,14 @@ possible_covars <- c("temp", "depth","")
 covariance <- c("spatio", "spatiotemp")
 
 run_one_spp(data_list[[i]], config_file=config_list[[i]],
-            folder_name=paste(spp[i],covariance[1],possible_covars[1],sep="_"), 
-            covar_columns=c(possible_covars[1]))
+            folder_name=paste(spp[i],covariance[2],possible_covars[2],sep="_"), 
+            covar_columns=c(possible_covars[2]))
+
+run_one_spp(nrocksole, config_file=config_list[[4]],
+            folder_name="nrock_spatiotemp_poisson_depth", 
+            covar_columns=c(possible_covars[2]))
+
+
 
 
 
