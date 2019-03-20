@@ -1,4 +1,4 @@
-run_one_spp <- function(Data_Geostat, config_file, folder_name,
+run_multi_spp <- function(Data_Geostat, config_file, folder_name,
                         covar_columns=NA){
   orig_dat <- Data_Geostat
   setwd(here())
@@ -13,7 +13,7 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
                                                    DirPath=DateFile, Save_Results=FALSE)
   # Add knots to Data_Geostat
   Data_Geostat = cbind( Data_Geostat, "knot_i"=Spatial_List$knot_i )
-  browser()
+
   if(!is.na(covar_columns)){
   covsperknot <- suppressMessages(FishStatsUtils::format_covariates(
     Lat_e = orig_dat$Lat,
@@ -36,7 +36,7 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
   TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
                     "RhoConfig"=RhoConfig, "ObsModel"=ObsModel,
                     "b_i"=Data_Geostat[,'Catch_KG'], "a_i"=Data_Geostat[,'AreaSwept_km2']+1,
-                    "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = Data_Geostat[,'spp'],
+                    "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = rep(0,nrow(Data_Geostat)),
                     "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList,
                     "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options, X_xtp=X_xtp)
   Xconfig_zcp = TmbData$Xconfig_zcp
@@ -45,7 +45,7 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
   TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
                     "RhoConfig"=RhoConfig, "ObsModel"=ObsModel,
                     "b_i"=Data_Geostat[,'Catch_KG'], "a_i"=Data_Geostat[,'AreaSwept_km2']+1,
-                     "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = Data_Geostat[,'spp'],
+                     "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = rep(0,nrow(Data_Geostat)),
                      "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList,
                      "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options, X_xtp=X_xtp, Xconfig_zcp = Xconfig_zcp)
   } else{
@@ -53,33 +53,23 @@ run_one_spp <- function(Data_Geostat, config_file, folder_name,
     TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
                       "RhoConfig"=RhoConfig, "ObsModel"=ObsModel, 
                       "b_i"=Data_Geostat[,'Catch_KG'], "a_i"=Data_Geostat[,'AreaSwept_km2']+1, 
-                      "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = Data_Geostat[,'spp'],
+                      "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = rep(0,nrow(Data_Geostat)),
                       "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList, 
                       "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options,
                       Aniso=1)
     Xconfig_zcp = TmbData$Xconfig_zcp
     Xconfig_zcp[1,,] = 0
-
-    save(Xconfig_zcp,FieldConfig, RhoConfig, ObsModel, Data_Geostat, Spatial_List, Options, DateFile, Version, Method, file="minRepro3spp.RData")
     
     TmbData = Data_Fn("Version"=Version, "FieldConfig"=FieldConfig,
                       "RhoConfig"=RhoConfig, "ObsModel"=ObsModel,
                       "b_i"=Data_Geostat[,'Catch_KG'], "a_i"=Data_Geostat[,'AreaSwept_km2']+1,
-                      "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = Data_Geostat[,'spp'],
+                      "s_i"=Data_Geostat[,'knot_i']-1, "c_iz" = rep(0,nrow(Data_Geostat)),
                       "t_i"=Data_Geostat[,'Year'], "a_xl"=Spatial_List$a_xl, "MeshList"=Spatial_List$MeshList,
-                      "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options, Xconfig_zcp = Xconfig_zcp, CheckForErrors = FALSE)
+                      "GridList"=Spatial_List$GridList, "Method"=Spatial_List$Method, "Options"=Options, Xconfig_zcp = Xconfig_zcp)
   }
   
   TmbList = Build_TMB_Fn("TmbData"=TmbData, "RunDir"=DateFile, "Version"=Version, "RhoConfig"=RhoConfig, 
                          "loc_x"=Spatial_List$loc_x, "Method"=Method)
-  Map = TmbList$Map
-  Map$beta1_ft = factor( array(NA,dim=dim(TmbList$Parameters$beta1_ft)) )
-  Params = TmbList$Parameters
-  Params$beta1_ft = array(20, dim=dim(TmbList$Parameters$beta1_ft))
-  
-  TmbList = Build_TMB_Fn("TmbData"=TmbData, "RunDir"=DateFile, "Version"=Version, "RhoConfig"=RhoConfig,
-                         "loc_x"=Spatial_List$loc_x, "Method"=Method, "Parameters"=Params, "Map"=Map)
-  
   Obj = TmbList[["Obj"]]
   Opt = TMBhelper::Optimize(obj=Obj, lower=TmbList[["Lower"]], upper=TmbList[["Upper"]], getsd=TRUE, savedir=DateFile, bias.correct=TRUE, newtonsteps=1, bias.correct.control=list(sd=FALSE, split=NULL, nsplit=1, vars_to_correct="Index_cyl"), loopnum=5)
   #, control = list(abs.tol = 1e-20))
