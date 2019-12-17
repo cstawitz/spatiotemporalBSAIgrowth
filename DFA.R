@@ -2,8 +2,9 @@ library(MARSS)
 
 
 cold_pool<-read.csv("./data/cpa_areas2018.csv")
-
-
+for(i in 2:8){
+plot((cold_pool[,i]-mean(cold_pool[,i]))/sd(cold_pool[,i])~cold_pool[,1], type="l", main=names(cold_pool)[i], ylim= c(-3,3))
+}
 mm <- 3
 ## 'BB' is identity: 1's along the diagonal & 0's elsewhere
 BB <- "identity"  # diag(mm)

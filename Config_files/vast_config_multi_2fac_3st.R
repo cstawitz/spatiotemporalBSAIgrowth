@@ -7,9 +7,9 @@ Kmeans_Config = list( "randomseed"=1, "nstart"=100, "iter.max"=1e3 )
 
 OverdispersionConfig = c("Delta1"=0, "Delta2"=0)
 # Using 4 factors for spatial, spatio-tempral and intercepts for beta2, and no variation in beta1
-FieldConfig = matrix( c(0,4, 0,4, "IID",4), byrow=TRUE, ncol=2 )
+FieldConfig = matrix( c(0,4, 0,3, "IID",4), byrow=TRUE, ncol=2 )
 # Using AR1 for beta2
-RhoConfig = c("Beta1"=0, "Beta2"=1, "Epsilon1"=0, "Epsilon2"=0)
+RhoConfig = c("Beta1"=0, "Beta2"=2, "Epsilon1"=0, "Epsilon2"=0)
 # Using conventional delta-model so that I can fix beta1 = 20 to have Pr(B>0)->1, but doesn't affect interpretation of beta2
 ObsModel = c(1,0)
 

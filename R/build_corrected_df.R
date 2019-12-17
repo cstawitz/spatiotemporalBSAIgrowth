@@ -6,13 +6,15 @@
 #'@param sex - code for fish sex
 #'@param renames - vector of renames 
 build_corrected_df <- function(dataset__, age, species_code, sex, renames){
-  species_data <- filter(dataset__, SPECIES_CODE==species_code, 
-                         Sex==sex)
+
+    species_data <- filter(dataset__, SPECIES_CODE==species_code, 
+                           SEX==sex)
   corrected_lengths <- get_unbiased_lengths(species_data, 
                       age.name="AGE", length.name = "LENGTH..cm.",
                       year.name = "YEAR", 
                       lat.name = "START_LATITUDE",
                       lon.name = "START_LONGITUDE")
+
   corrected_age<- data.frame(cbind(row.names(corrected_lengths),select(corrected_lengths, age)))
   names(corrected_age) <- c("ID", "lengths")
   corrected_age <- filter(corrected_age, lengths>0)
