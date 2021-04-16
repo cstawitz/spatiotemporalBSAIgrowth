@@ -18,7 +18,8 @@ ObsModel = c(1,0)
 Options =  c("SD_site_density"=0, "SD_site_logdensity"=0, 
              "Calculate_Range"=0, "Calculate_evenness"=0, 
              "Calculate_effective_area"=1, "Calculate_Cov_SE"=0, 
-             'Calculate_Synchrony'=0, 'Calculate_Coherence'=0)
+             'Calculate_Synchrony'=0, 'Calculate_Coherence'=0,
+             "Project_factors"=1)
 
 #Strata limits
 strata.limits <- data.frame('STRATA'="All_areas")

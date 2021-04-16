@@ -8,7 +8,7 @@
 build_corrected_df <- function(dataset__, age, species_code, sex, renames){
 
     species_data <- filter(dataset__, SPECIES_CODE==species_code, 
-                           SEX==sex)
+                           Sex==sex)
   corrected_lengths <- get_unbiased_lengths(species_data, 
                       age.name="AGE", length.name = "LENGTH..cm.",
                       year.name = "YEAR", 

@@ -3,7 +3,7 @@
 .Rapp.history
 
 # Session Data files
-.RData
+*.RData
 
 # Example code in package build process
 *-Ex.R
@@ -37,3 +37,9 @@ rsconnect/
 .Rproj.user
 
 /VAST_output/
+
+*.png
+*.csv
+*.xlsx
+*.docx
+*.pdf
