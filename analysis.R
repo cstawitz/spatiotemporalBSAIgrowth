@@ -13,6 +13,8 @@ Version = get_latest_version()
 
 library(dplyr)
 #Read in raw data
+#
+make_data <- function(){
 raw_data <- read.csv("./data/ebs_Updated.csv")
 
 #Data Check
@@ -56,6 +58,11 @@ flathead$spp <- 3
 
 multi <- rbind(pollock, pcod, yellowfin, flathead)
 save(multi, file="JoinedEBSData.RData")
+return(multi)
+}
+
+
+load("data/JoinedEBSData.RData")
 cold_pool<-read.csv("./data/cpa_areas2018.csv")
 pollock_bio <- read.csv("./data/PollockDensity.csv")
 enso_pdo <- read.csv("./data/ENSOIndex.csv")
